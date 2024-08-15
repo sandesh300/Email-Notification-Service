@@ -76,4 +76,17 @@ This Node.js application is a notification service that sends emails with retry 
     }
 }
  ```
+### Screenshot of output - 
+![Screenshot (24)](https://github.com/user-attachments/assets/02cfc3aa-d538-4559-9750-4ed9b8cd8e3d)
+
+### POST Api response -
+![Screenshot (23)](https://github.com/user-attachments/assets/b28258f6-1b62-4778-afe7-25a02effc68c)
+
+### Generate email
+![Screenshot (25)](https://github.com/user-attachments/assets/d5faa33f-5505-4d31-b31b-d7c1c26da981)
+
+
+
+
+
 
