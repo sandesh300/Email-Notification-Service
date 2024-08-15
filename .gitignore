@@ -1,3 +1,4 @@
 # Node.js dependency directories
 node_modules/
 jspm_packages/
+.env
