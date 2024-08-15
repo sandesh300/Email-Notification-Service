@@ -1,6 +1,4 @@
-Here's a sample `README.md` file for your notification service application in Node.js:
 
-```markdown
 # Notification Service with Retry Logic
 
 This Node.js application is a notification service that sends emails with retry logic and switches to a backup email service after three consecutive failures. The service is built using `Express.js` and `Nodemailer`.
@@ -22,7 +20,7 @@ This Node.js application is a notification service that sends emails with retry 
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your-username/notification-service.git
+    git clone https://github.com/sandesh300/email-notification-service.git
     cd notification-service
     ```
 
@@ -67,7 +65,7 @@ This Node.js application is a notification service that sends emails with retry 
 
 3. The API will respond with a JSON object similar to the following:
 
-    ```json
+ ```json
   {
     "status": "success",
     "channels": {
@@ -77,21 +75,5 @@ This Node.js application is a notification service that sends emails with retry 
         }
     }
 }
-    ```
-
-## File Structure
-
-```plaintext
-├── app.js                   # Initializes the Express app and sets up middleware
-├── server.js                # Starts the Express server
-├── controllers
-│   └── notificationController.js  # Handles the email sending logic
-├── utils
-│   ├── retry.js             # Contains the retry logic for email delivery
-│   ├── primaryTransporter.js # Sets up the primary email transporter
-│   └── backupTransporter.js  # Sets up the backup email transporter
-├── .env                     # Environment variables
-├── .gitignore               # Files and directories to be ignored by Git
-└── package.json             # Project metadata and dependencies
-```
+ ```
 
