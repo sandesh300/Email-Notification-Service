@@ -1,92 +1,57 @@
+# Resilient Email Service
 
-# Notification Service with Retry Logic
-
-This Node.js application is a notification service that sends emails with retry logic and switches to a backup email service after three consecutive failures. The service is built using `Express.js` and `Nodemailer`.
+This project implements a resilient email sending service with retry logic, fallback mechanism, rate limiting, and circuit breaker pattern.
 
 ## Features
 
-- **Retry Logic:** Automatically retries email delivery up to 3 times on failure.
-- **Backup Service:** Switches to a backup email service if the primary one fails.
-- **Environment Configuration:** All sensitive information (email credentials) is stored in a `.env` file.
-- **RESTful API:** Exposes an API endpoint to send emails with specified parameters.
+- Retry mechanism with exponential backoff
+- Fallback between primary and secondary email providers
+- Idempotency using unique email IDs
+- Rate limiting
+- Status tracking for email sending attempts
+- Circuit breaker pattern
+- Simple logging
 
-## Prerequisites
+## Setup
 
-- Node.js (v14 or above)
-- NPM or Yarn
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Build the project: `npm run build`
+4. Run the application: `npm start`
+5. Run tests: `npm test`
 
-## Installation
+## Assumptions
 
-1. Clone the repository:
-
-    ```bash
-    git clone https://github.com/sandesh300/email-notification-service.git
-    cd notification-service
-    ```
-
-2. Install the dependencies:
-
-    ```bash
-    npm install
-    ```
-
-3. Create a `.env` file in the root directory and add the following environment variables:
-
-    ```env
-    PORT=3000
-
-    PRIMARY_EMAIL=your_primary_email@gmail.com
-    PRIMARY_EMAIL_PASSWORD=your_primary_email_password
-
-    BACKUP_EMAIL=your_backup_email@gmail.com
-    BACKUP_EMAIL_PASSWORD=your_backup_email_password
-    ```
+- The email providers are mocked for demonstration purposes
+- The rate limit is set to 10 emails per second
+- The circuit breaker opens after 5 consecutive failures and resets after 60 seconds
+- Exponential backoff is used for retries
 
 ## Usage
 
-1. Start the server:
+```typescript
+import { EmailService } from './services/EmailService';
+import { MockEmailProvider } from './services/MockEmailProvider';
 
-    ```bash
-    npm start
-    ```
+const primaryProvider = new MockEmailProvider('Primary Provider');
+const secondaryProvider = new MockEmailProvider('Secondary Provider');
 
-    The server will start running on `http://localhost:3000`.
+const emailService = new EmailService(primaryProvider, secondaryProvider, 10, 1000);
 
-2. Send an email by making a POST request to `http://localhost:3000/send-email` with the following JSON body:
+async function sendEmail() {
+  const emailId = await emailService.sendEmail({
+    to: 'example@example.com',
+    subject: 'Test Email',
+    body: 'This is a test email',
+  });
 
-    ```json
-    {
-        "from": "sandeshbhujbal007@gmail.com",
-        "to": "sanketkatke100@gmail.com",
-        "subject": "Test email",
-        "html": "<h1>This is the test email.</h1>"
-    }
-    ```
+  console.log(`Email sent with ID: ${emailId}`);
 
-3. The API will respond with a JSON object similar to the following:
-
- ```json
-  {
-    "status": "success",
-    "channels": {
-        "email": {
-            "Id": "aa67b0a3-e599-4a14-865b-68cb657870c6@sandbox593c3fb39bfa4e57adc55ab8ad0a1.maigum.args",
-            "providerId": "email-sailgın-provider"
-        }
-    }
+  // Check status after 5 seconds
+  setTimeout(async () => {
+    const status = await emailService.getEmailStatus(emailId);
+    console.log(`Email status: ${JSON.stringify(status)}`);
+  }, 5000);
 }
- ```
-### Screenshot of output - 
-![Screenshot (24)](https://github.com/user-attachments/assets/02cfc3aa-d538-4559-9750-4ed9b8cd8e3d)
 
-### POST Api response -
-![Screenshot (23)](https://github.com/user-attachments/assets/b28258f6-1b62-4778-afe7-25a02effc68c)
-
-### Generate email
-![Screenshot (25)](https://github.com/user-attachments/assets/d5faa33f-5505-4d31-b31b-d7c1c26da981)
-
-
-
-
-
-
+sendEmail().catch(console.error);
