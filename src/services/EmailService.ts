@@ -1,3 +1,4 @@
+// src/services/EmailService.ts
 
 import { v4 as uuidv4 } from 'uuid';
 import { EmailProvider } from '../interfaces/EmailProvider';
@@ -42,10 +43,12 @@ export class EmailService {
     };
     this.emailStatuses.set(id, status);
 
-    this.sendEmailWithRetry(id).catch((error) => {
-      Logger.error(`Failed to send email ${id}: ${error.message}`);
+    try {
+      await this.sendEmailWithRetry(id);
+    } catch (error) {
+      Logger.error(`Failed to send email ${id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       this.emailQueue.enqueue(id, email);
-    });
+    }
 
     return id;
   }
@@ -84,11 +87,7 @@ export class EmailService {
 
         if (status.status === 'sent') return;
       } catch (error) {
-        if (error instanceof Error) {
-          Logger.error(`Attempt ${attempt + 1} failed for email ${id}: ${error.message}`);
-        } else {
-          Logger.error(`Attempt ${attempt + 1} failed for email ${id}: Unknown error`);
-        }
+        Logger.error(`Attempt ${attempt + 1} failed for email ${id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         await this.exponentialBackoff(attempt);
       }
 
@@ -100,6 +99,7 @@ export class EmailService {
 
     status.status = 'failed';
     Logger.error(`Email ${id} failed after ${maxRetries} attempts`);
+    throw new Error(`Failed to send email after ${maxRetries} attempts`);
   }
 
   private async exponentialBackoff(attempt: number): Promise<void> {
@@ -111,7 +111,11 @@ export class EmailService {
     while (!this.emailQueue.isEmpty()) {
       const item = this.emailQueue.dequeue();
       if (item) {
-        await this.sendEmailWithRetry(item.id);
+        try {
+          await this.sendEmailWithRetry(item.id);
+        } catch (error) {
+          Logger.error(`Failed to process queued email ${item.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
       }
     }
   }

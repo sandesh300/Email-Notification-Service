@@ -1,3 +1,4 @@
+// src/services/MockEmailProvider.ts
 
 import { EmailProvider } from '../interfaces/EmailProvider';
 
@@ -13,8 +14,6 @@ export class MockEmailProvider implements EmailProvider {
   }
 
   async sendEmail(to: string, subject: string, body: string): Promise<boolean> {
-    await new Promise(resolve => setTimeout(resolve, 100)); // Simulate network delay
-    
     if (this.consecutiveFailures > 0) {
       this.consecutiveFailures--;
       throw new Error(`${this.name} failed to send email`);
@@ -26,5 +25,13 @@ export class MockEmailProvider implements EmailProvider {
     
     console.log(`${this.name} sent email to ${to}`);
     return true;
+  }
+
+  setFailureRate(rate: number): void {
+    this.failureRate = rate;
+  }
+
+  setConsecutiveFailures(failures: number): void {
+    this.consecutiveFailures = failures;
   }
 }
