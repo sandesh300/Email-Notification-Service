@@ -1,4 +1,4 @@
-# Resilient Email Service
+# Resilient Email Sending Service
 
 This project implements a resilient email sending service with retry logic, fallback mechanism, rate limiting, and circuit breaker pattern.
 
