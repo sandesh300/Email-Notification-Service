@@ -1,57 +1,80 @@
+
 # Resilient Email Service
 
-This project implements a resilient email sending service with retry logic, fallback mechanism, rate limiting, and circuit breaker pattern.
+A robust and fault-tolerant email sending service built with TypeScript and Node.js. This service implements advanced error handling techniques, including retry mechanisms, fallback providers, rate limiting, and circuit breaking.
 
 ## Features
 
-- Retry mechanism with exponential backoff
-- Fallback between primary and secondary email providers
-- Idempotency using unique email IDs
-- Rate limiting
-- Status tracking for email sending attempts
-- Circuit breaker pattern
-- Simple logging
+- **Retry Mechanism**: Automatically retries failed email sending attempts with exponential backoff.
+- **Fallback Mechanism**: Switches to a secondary email provider if the primary provider fails consistently.
+- **Rate Limiting**: Prevents overwhelming email providers by limiting the rate of email sending.
+- **Circuit Breaker**: Temporarily disables the email sending functionality if too many failures occur, preventing system overload.
+- **Idempotency**: Uses unique IDs for each email to prevent duplicate sends.
+- **Queue System**: Failed emails are added to a queue for later retry.
+- **Detailed Logging**: Comprehensive logging of all email sending attempts and their outcomes.
+- **Performance Metrics**: Tracks success rates and average attempts per email.
 
-## Setup
+## Prerequisites
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Build the project: `npm run build`
-4. Run the application: `npm start`
-5. Run tests: `npm test`
+- Node.js (version 12 or higher)
+- npm (comes with Node.js)
 
-## Assumptions
+## Installation
 
-- The email providers are mocked for demonstration purposes
-- The rate limit is set to 10 emails per second
-- The circuit breaker opens after 5 consecutive failures and resets after 60 seconds
-- Exponential backoff is used for retries
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/resilient-email-service.git
+   cd resilient-email-service
+   ```
+
+2. Install dependencies:
+   ```
+   npm install
+   ```
+
+3. Build the project:
+   ```
+   npm run build
+   ```
 
 ## Usage
 
-```typescript
-import { EmailService } from './services/EmailService';
-import { MockEmailProvider } from './services/MockEmailProvider';
+1. Configure the email providers in `src/index.ts`:
+   ```typescript
+   const primaryProvider = new MockEmailProvider('Primary Provider', 0.5, 3);
+   const secondaryProvider = new MockEmailProvider('Secondary Provider', 0.2);
+   ```
 
-const primaryProvider = new MockEmailProvider('Primary Provider');
-const secondaryProvider = new MockEmailProvider('Secondary Provider');
+2. Run the application:
+   ```
+   npm start
+   ```
 
-const emailService = new EmailService(primaryProvider, secondaryProvider, 10, 1000);
+3. The application will send test emails and display the results, including success rates and performance metrics.
 
-async function sendEmail() {
-  const emailId = await emailService.sendEmail({
-    to: 'example@example.com',
-    subject: 'Test Email',
-    body: 'This is a test email',
-  });
+## Configuration
 
-  console.log(`Email sent with ID: ${emailId}`);
+- Adjust the rate limiting parameters in `src/services/EmailService.ts`:
+  ```typescript
+  this.rateLimiter = new RateLimiter(10, 1000); // 10 emails per second
+  ```
 
-  // Check status after 5 seconds
-  setTimeout(async () => {
-    const status = await emailService.getEmailStatus(emailId);
-    console.log(`Email status: ${JSON.stringify(status)}`);
-  }, 5000);
-}
+- Modify the circuit breaker settings in `src/services/EmailService.ts`:
+  ```typescript
+  this.circuitBreaker = new CircuitBreaker(5, 60000); // Opens after 5 failures, resets after 60 seconds
+  ```
 
-sendEmail().catch(console.error);
+## Testing
+
+Run the test suite with:
+```
+npm test
+```
+
+## Project Structure
+
+- `src/services/`: Contains core service classes (EmailService, MockEmailProvider, etc.)
+- `src/utils/`: Utility classes like CircuitBreaker and Logger
+- `src/interfaces/`: TypeScript interfaces
+- `src/types/`: Custom type definitions
+- `tests/`: Unit and integration tests
